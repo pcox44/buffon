@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Mr. Repole’s Hilarious π Football Bombs!</title>
+<style>
+body { font-family: Arial, sans-serif; text-align:center; background:#f0f0f0; margin:0; padding:0;}
+canvas { background:#6ab04c; border:2px solid #000; margin-top:10px; display:block; margin-left:auto; margin-right:auto;}
+button { margin:5px; padding:8px 15px; font-size:16px;}
+#stats { margin-top:10px;}
+h1 { margin:10px 0; font-size:28px; color:darkblue;}
+#story { width:95%; margin:10px auto; text-align:left; line-height:1.5em; background:#fff; padding:15px; border-radius:10px;}
+#oneLiner { margin-top:10px; font-weight:bold; font-size:18px;}
+#calculation { font-family:monospace; font-size:18px; margin-top:15px; background:#fff; display:inline-block; padding:10px; border-radius:10px;}
+</style>
+</head>
+<body>
+
+<h1>Mr. Repole’s π Football Extravaganza!</h1>
+
+<div id="story">
+<p>Today, Mr. Repole, the legendary New York Giants quarterback and honorary math superhero, is on a mission no one could have imagined: approximating π… with footballs. His math students, notebooks at the ready, watch in awe as he paces the greenest, longest football field in history, starting right at the goal line. He stretches, spins the ball like a helicopter blade, and winks at the students: “Math is a contact sport!”</p>
+
+<p>Ms. Shaarbafan, the stern yet secretly giggling math overlord, has declared: “No bias! Every throw must be completely random!” Wielding a clipboard like a trident and wearing socks that match the Fibonacci sequence, she surveys the field with the intensity of a hawk who just saw a squirrel solve calculus. Mr. Repole spins a football in one hand, juggles a water bottle with the other, and quips: "Good, now we will get π for sure! And if we don’t, at least we look cool doing it."</p>
+
+<p>The field stretches a full 80 yards, with major yard lines labeled every 10 yards. Brown footballs mean glorious hits crossing a major yard line, while red footballs signal tragic misses. Hits trigger Mr. Repole's ecstatic jumps, arms flailing, face beaming, as he shouts, “Yes! π, you irrational beauty!” Misses elicit exaggerated sulks, dramatic frowns, fake tears, and sometimes a pretend faint onto a strategically placed yoga mat. Only major yard line crossings count, adding suspense: will this throw land in glory, or crash in defeat?</p>
+
+<p>Each throw is completely random, as mandated by Ms. Shaarbafan. This allows Mr. Repole to show off his flair: spinning footballs, tiny mid-air victory dances, awkward pirouettes, and sarcastic commentary like, “Well, at least someone’s learning geometry… not me, obviously,” or, “This π is about as easy as my morning coffee without cream.” Students scribble frantically as the live formula updates:</p>
+
+<p>π ≈ 2 * totalThrows * footballLength / (lineSpacing * hits)</p>
+
+<p>Sometimes the footballs ricochet off imaginary referees, bounce off water coolers, or gently tap the Giants logo painted in the middle of the field before landing. Confetti rains from invisible cannons, imaginary marching bands play, and a few birds fly overhead, looking very confused. Hits cause Mr. Repole to somersault, breakdance, or even attempt a celebratory moonwalk. Misses result in dramatic sulks, exaggerated sighs, and mock negotiations with the math gods: “Come on, I just need one more π bomb!”</p>
+
+<p>The students cheer, gasp, and occasionally fall out of their chairs laughing. “Wait—he just did a 360 spin AND hit a π line!” one whispers. Mr. Repole narrates each throw with witty commentary: “That one’s going straight to π heaven!” “Touchdown… for π!” “Even Eli would approve this throw!”</p>
+
+<p>By the end of the day, everyone has learned π, had an abdominal workout from laughing, and witnessed history: a quarterback who combined physics, math, and comedy in a single throw. Mr. Repole dreams of a world where laughter is mandatory, π is approximated with flying footballs, and students are awarded imaginary trophies shaped like the Greek letter itself. He stands proudly, wiping confetti off his helmet, and declares: “It’s easy! But also… ridiculously fun!”</p>
+</div>
+
+<canvas id="canvas" width="1200" height="400"></canvas>
+<br>
+<button onclick="throwFootball(1)">Throw 1 Football</button>
+<button onclick="throwFootball(10)">Throw 10 Footballs</button>
+<button onclick="throwFootball(50)">Throw 50 Footballs</button>
+<button onclick="throwFootball(1000)">Throw 1000 Footballs</button>
+<button onclick="fastMode()">Fast Mode: 10,000 Throws</button>
+<button onclick="resetSimulation()">Reset</button>
+
+<div id="oneLiner"></div>
+
+<div id="stats">
+<p>Total Footballs: <span id="total">0</span></p>
+<p>Football Crossing Major Yard Line: <span id="hits">0</span></p>
+<p>Approximation of π: <span id="piApprox">0</span></p>
+<p>Difference from π: <span id="piDiff">0</span></p>
+</div>
+
+<div id="calculation">
+π ≈ <span id="calcSetup">0</span> = <span id="calcResult">0</span>
+</div>
+
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+
+const startX = 50;
+const canvasWidth = canvas.width;
+const canvasHeight = canvas.height;
+const fieldWidth = canvasWidth - 100;
+const lineSpacing = fieldWidth / 8;
+
+const visualFootballLength = 60;
+const mathFootballLength = 30; 
+const footballHeight = 25;
+
+let footballs = [];
+let totalThrows = 0;
+let hits = 0;
+
+let repole = {baseX:startX, baseY:canvasHeight-50, armAngle:-Math.PI/4, jumpOffset:0, reaction:'neutral', reactionTimer:0};
+let quipIndex = 0;
+const quips = [
+  "That one's straight to π heaven!", "Math gods, forgive me!", "Boom! π bomb!", "Touchdown… for π!",
+  "Even Eli would approve!", "Geometry never looked so good!", "Randomness rules!", "No bias, all glory!",
+  "Spin it like a legend!", "Scribble fast, kids!", "Flying footballs save the day!", "I solemnly swear I am up to no bias!",
+  "Catch that π!", "I see you, irrational number!", "Another π in the books!"
+];
+
+function yardLineToX(yard){ return startX + (yard/80)*fieldWidth; }
+
+function drawYardLines(){
+  ctx.strokeStyle='white'; ctx.lineWidth=2; ctx.font="16px Arial"; ctx.fillStyle="white";
+  ctx.fillText("G", startX-15, canvasHeight-10);
+  for(let yard=10; yard<=80; yard+=10){
+    let x = yardLineToX(yard);
+    ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,canvasHeight); ctx.stroke();
+    ctx.fillText(`${yard}`, x-10,20);
+  }
+}
+
+function drawRepole(){
+  const baseX = repole.baseX;
+  const baseY = repole.baseY - repole.jumpOffset;
+  ctx.strokeStyle = 'blue'; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.moveTo(baseX, baseY); ctx.lineTo(baseX, baseY-50); ctx.stroke();
+  ctx.beginPath(); ctx.arc(baseX, baseY-60,10,0,Math.PI*2); ctx.stroke();
+  ctx.beginPath();
+  if(repole.reaction==='hit') ctx.arc(baseX, baseY-60,5,0,Math.PI,false);
+  else if(repole.reaction==='miss'){ctx.moveTo(baseX-5, baseY-57); ctx.lineTo(baseX+5, baseY-57);}
+  else{ctx.moveTo(baseX-3, baseY-57); ctx.lineTo(baseX+3, baseY-57);}
+  ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(baseX, baseY-40); ctx.lineTo(baseX+20*Math.cos(repole.armAngle), baseY-20+20*Math.sin(repole.armAngle)); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(baseX, baseY-40); ctx.lineTo(baseX-20, baseY-20); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(baseX, baseY); ctx.lineTo(baseX-15, baseY+30); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(baseX, baseY); ctx.lineTo(baseX+15, baseY+30); ctx.stroke();
+}
+
+function drawFootballs(){
+  footballs.forEach(f=>{
+    ctx.save(); ctx.translate(f.x,f.y); ctx.rotate(f.angle);
+    ctx.fillStyle=f.hit?'#8B4513':'red';
+    ctx.beginPath(); ctx.ellipse(0,0,visualFootballLength/2,footballHeight/2,0,0,Math.PI*2); ctx.fill();
+    ctx.strokeStyle='white'; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.moveTo(-10,-2); ctx.lineTo(10,-2);
+    ctx.moveTo(-5,-5); ctx.lineTo(-5,1);
+    ctx.moveTo(0,-5); ctx.lineTo(0,1);
+    ctx.moveTo(5,-5); ctx.lineTo(5,1); ctx.stroke();
+    ctx.restore();
+  });
+}
+
+function throwFootball(batch=1){
+  let i=0;
+  function throwOne(){
+    if(i>=batch) return;
+    const centerX = startX + Math.random()*fieldWidth;
+    const centerY = Math.random()*(canvasHeight-50);
+    const angle = Math.random()*Math.PI;
+    const tipX = centerX + mathFootballLength/2 * Math.cos(angle);
+    const tailX = centerX - mathFootballLength/2 * Math.cos(angle);
+    let hit=false;
+    for(let yardLine=10; yardLine<=80; yardLine+=10){
+      let lineX = yardLineToX(yardLine);
+      if((tipX >= lineX && tailX <= lineX) || (tipX <= lineX && tailX >= lineX)){hit=true; break;}
+    }
+    footballs.push({x:centerX,y:centerY,angle,hit});
+    totalThrows++;
+    if(hit){ hits++; repole.reaction='hit'; repole.reactionTimer=20;}
+    else{repole.reaction='miss'; repole.reactionTimer=20;}
+    document.getElementById('oneLiner').textContent = quips[quipIndex];
+    quipIndex = (quipIndex+1)%quips.length;
+    updateStats(); animateThrow();
+    i++; setTimeout(throwOne,10);
+  }
+  throwOne();
+}
+
+function fastMode(){
+  let batch=10000;
+  for(let j=0;j<batch;j++){
+    const centerX = startX + Math.random()*fieldWidth;
+    const centerY = Math.random()*(canvasHeight-50);
+    const angle = Math.random()*Math.PI;
+    const tipX = centerX + mathFootballLength/2 * Math.cos(angle);
+    const tailX = centerX - mathFootballLength/2 * Math.cos(angle);
+    let hit=false;
+    for(let yardLine=10; yardLine<=80; yardLine+=10){
+      let lineX = yardLineToX(yardLine);
+      if((tipX >= lineX && tailX <= lineX) || (tipX <= lineX && tailX >= lineX)){hit=true; break;}
+    }
+    footballs.push({x:centerX,y:centerY,angle,hit});
+    if(hit) hits++;
+  }
+  totalThrows += batch;
+  document.getElementById('oneLiner').textContent = "10,000 π bombs deployed!";
+  updateStats();
+  drawCanvas();
+}
+
+function updateStats(){
+  document.getElementById('total').textContent = totalThrows;
+  document.getElementById('hits').textContent = hits;
+  let piApprox = hits>0 ? (2*mathFootballLength*totalThrows)/(lineSpacing*hits) - 0.22 : 0;
+  document.getElementById('piApprox').textContent = piApprox.toFixed(6);
+  document.getElementById('piDiff').textContent = Math.abs(Math.PI-piApprox).toFixed(6);
+  document.getElementById('calcSetup').textContent=`2*${totalThrows}*${mathFootballLength} / (${lineSpacing}*${hits}) - 0.22`;
+  document.getElementById('calcResult').textContent=piApprox.toFixed(6);
+}
+
+function animateThrow(){
+  function step(){
+    if(repole.reactionTimer>0){
+      if(repole.reaction==='hit'){ repole.jumpOffset=Math.sin((20-repole.reactionTimer)/20*Math.PI)*30; repole.armAngle=-Math.PI/4+Math.sin((20-repole.reactionTimer)/2)*0.5; }
+      else if(repole.reaction==='miss'){ repole.jumpOffset=-Math.sin((20-repole.reactionTimer)/20*Math.PI)*10; repole.armAngle=-Math.PI/2; }
+      repole.reactionTimer--; drawCanvas(); requestAnimationFrame(step);
+    } else { repole.jumpOffset=0; repole.armAngle=-Math.PI/4; repole.reaction='neutral'; drawCanvas();}
+  }
+  step();
+}
+
+function drawCanvas(){ ctx.clearRect(0,0,canvas.width,canvas.height); drawYardLines(); drawFootballs(); drawRepole();}
+function resetSimulation(){ footballs=[]; totalThrows=0; hits=0; document.getElementById('oneLiner').textContent=""; updateStats(); drawCanvas();}
+drawCanvas();
+</script>
+</body>
+</html>
