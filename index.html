@@ -21,7 +21,6 @@ h1 { margin:10px 0; font-size:28px; color:darkblue;}
 <button onclick="toggleStory()">Show/Hide Story</button>
 
 <div id="story">
-<!-- Story content remains the same -->
 <p>Today, Mr. Repole, the legendary New York Giants quarterback and math teacher, is on a mission no one could have imagined: approximating π… with footballs. His math students, notebooks at the ready, watch in awe as he paces the greenest, longest football field in history, starting right at the goal line. He stretches, spins the ball like a helicopter blade, and winks at the students: “Math is a contact sport!”</p>
 <p>Ms. Shaarbafan, the stern yet secretly giggling math overlord, has declared: “No bias! Every throw must be completely random!” Wielding a clipboard like a trident and wearing socks that match the Fibonacci sequence, she surveys the field with the intensity of a hawk who just saw a squirrel solve calculus. Mr. Repole spins a football in one hand, juggles a water bottle with the other, and quips: "Good, now we will get π for sure! And if we don’t, at least we look cool doing it."</p>
 <p>The field stretches a full 80 yards (enough to handle Mr. Repole's bombs), with major yard lines labeled every 10 yards. Brown footballs mean glorious hits crossing a major yard line, while red footballs signal tragic misses. Hits trigger Mr. Repole's ecstatic jumps, arms flailing, face beaming, as he shouts, “Yes! π, you irrational beauty!” Misses elicit exaggerated sulks, dramatic frowns, fake tears, and sometimes a pretend faint onto a strategically placed yoga mat. Only major yard line crossings count, adding suspense: will this throw land in glory, or crash in defeat?</p>
@@ -55,13 +54,13 @@ h1 { margin:10px 0; font-size:28px; color:darkblue;}
 </div>
 
 <script>
-// Story toggle
+// Toggle story visibility
 function toggleStory(){
   const story = document.getElementById('story');
   story.style.display = (story.style.display==='none')?'block':'none';
 }
 
-// Canvas setup and game logic (same as before, except calculation)
+// Canvas setup
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 
@@ -131,48 +130,62 @@ function drawFootballs(){
   });
 }
 
-function throwFootball(batch=1){
-  let i=0;
-  function throwOne(){
-    if(i>=batch) return;
-    const centerX = startX + Math.random()*fieldWidth;
-    const centerY = Math.random()*(canvasHeight-50);
-    const angle = Math.random()*Math.PI;
-    const tipX = centerX + mathFootballLength/2 * Math.cos(angle);
-    const tailX = centerX - mathFootballLength/2 * Math.cos(angle);
-    let hit=false;
-    for(let yardLine=10; yardLine<=80; yardLine+=10){
-      let lineX = yardLineToX(yardLine);
-      if((tipX >= lineX && tailX <= lineX) || (tipX <= lineX && tailX >= lineX)){hit=true; break;}
-    }
-    footballs.push({x:centerX,y:centerY,angle,hit});
+// Buffon's Needle hit calculation
+function throwFootball(batch = 1) {
+  let i = 0;
+  function throwOne() {
+    if (i >= batch) return;
+
+    const centerX = Math.random() * fieldWidth + startX;
+    const centerY = Math.random() * (canvasHeight - 50);
+    const angle = Math.random() * Math.PI;
+
+    const distanceToNearestLine = Math.min(
+      (centerX - startX) % lineSpacing,
+      lineSpacing - ((centerX - startX) % lineSpacing)
+    );
+    const hit = distanceToNearestLine <= (mathFootballLength / 2) * Math.sin(angle);
+
+    footballs.push({ x: centerX, y: centerY, angle, hit });
+
     totalThrows++;
-    if(hit){ hits++; repole.reaction='hit'; repole.reactionTimer=20;}
-    else{repole.reaction='miss'; repole.reactionTimer=20;}
+    if (hit) {
+      hits++;
+      repole.reaction = 'hit';
+      repole.reactionTimer = 20;
+    } else {
+      repole.reaction = 'miss';
+      repole.reactionTimer = 20;
+    }
+
     document.getElementById('oneLiner').textContent = quips[quipIndex];
-    quipIndex = (quipIndex+1)%quips.length;
-    updateStats(); animateThrow();
-    i++; setTimeout(throwOne,10);
+    quipIndex = (quipIndex + 1) % quips.length;
+
+    updateStats();
+    animateThrow();
+
+    i++;
+    setTimeout(throwOne, 10);
   }
   throwOne();
 }
 
-function fastMode(){
-  let batch=10000;
-  for(let j=0;j<batch;j++){
-    const centerX = startX + Math.random()*fieldWidth;
-    const centerY = Math.random()*(canvasHeight-50);
-    const angle = Math.random()*Math.PI;
-    const tipX = centerX + mathFootballLength/2 * Math.cos(angle);
-    const tailX = centerX - mathFootballLength/2 * Math.cos(angle);
-    let hit=false;
-    for(let yardLine=10; yardLine<=80; yardLine+=10){
-      let lineX = yardLineToX(yardLine);
-      if((tipX >= lineX && tailX <= lineX) || (tipX <= lineX && tailX >= lineX)){hit=true; break;}
-    }
-    footballs.push({x:centerX,y:centerY,angle,hit});
-    if(hit) hits++;
+function fastMode() {
+  const batch = 10000;
+  for (let j = 0; j < batch; j++) {
+    const centerX = Math.random() * fieldWidth + startX;
+    const angle = Math.random() * Math.PI;
+
+    const distanceToNearestLine = Math.min(
+      (centerX - startX) % lineSpacing,
+      lineSpacing - ((centerX - startX) % lineSpacing)
+    );
+    const hit = distanceToNearestLine <= (mathFootballLength / 2) * Math.sin(angle);
+
+    footballs.push({ x: centerX, y: Math.random() * (canvasHeight - 50), angle, hit });
+    if (hit) hits++;
   }
+
   totalThrows += batch;
   document.getElementById('oneLiner').textContent = "10,000 π bombs deployed!";
   updateStats();
