@@ -9,7 +9,7 @@ canvas { background:#6ab04c; border:2px solid #000; margin-top:10px; display:blo
 button { margin:5px; padding:8px 15px; font-size:16px;}
 #stats { margin-top:10px;}
 h1 { margin:10px 0; font-size:28px; color:darkblue;}
-#story { width:95%; margin:10px auto; text-align:left; line-height:1.5em; background:#fff; padding:15px; border-radius:10px;}
+#story { width:95%; margin:10px auto; text-align:left; line-height:1.5em; background:#fff; padding:15px; border-radius:10px; display:none;}
 #oneLiner { margin-top:10px; font-weight:bold; font-size:18px;}
 #calculation { font-family:monospace; font-size:18px; margin-top:15px; background:#fff; display:inline-block; padding:10px; border-radius:10px;}
 </style>
@@ -18,21 +18,17 @@ h1 { margin:10px 0; font-size:28px; color:darkblue;}
 
 <h1>Mr. Repole’s π Football Extravaganza!</h1>
 
+<button onclick="toggleStory()">Show/Hide Story</button>
+
 <div id="story">
+<!-- Story content remains the same -->
 <p>Today, Mr. Repole, the legendary New York Giants quarterback and math teacher, is on a mission no one could have imagined: approximating π… with footballs. His math students, notebooks at the ready, watch in awe as he paces the greenest, longest football field in history, starting right at the goal line. He stretches, spins the ball like a helicopter blade, and winks at the students: “Math is a contact sport!”</p>
-
 <p>Ms. Shaarbafan, the stern yet secretly giggling math overlord, has declared: “No bias! Every throw must be completely random!” Wielding a clipboard like a trident and wearing socks that match the Fibonacci sequence, she surveys the field with the intensity of a hawk who just saw a squirrel solve calculus. Mr. Repole spins a football in one hand, juggles a water bottle with the other, and quips: "Good, now we will get π for sure! And if we don’t, at least we look cool doing it."</p>
-
 <p>The field stretches a full 80 yards (enough to handle Mr. Repole's bombs), with major yard lines labeled every 10 yards. Brown footballs mean glorious hits crossing a major yard line, while red footballs signal tragic misses. Hits trigger Mr. Repole's ecstatic jumps, arms flailing, face beaming, as he shouts, “Yes! π, you irrational beauty!” Misses elicit exaggerated sulks, dramatic frowns, fake tears, and sometimes a pretend faint onto a strategically placed yoga mat. Only major yard line crossings count, adding suspense: will this throw land in glory, or crash in defeat?</p>
-
 <p>Each throw is completely random, as mandated by Ms. Shaarbafan. This allows Mr. Repole to show off his flair: spinning footballs, tiny mid-air victory dances, awkward pirouettes, and sarcastic commentary like, “Well, at least someone’s learning geometry… not me, obviously,” or, “This π is about as easy as my morning coffee without cream.” Students scribble frantically as the live formula updates:</p>
-
 <p>π ≈ 2 * totalThrows * footballLength / (lineSpacing * hits)</p>
-
 <p>Sometimes the footballs ricochet off imaginary referees, bounce off water coolers, or gently tap the Giants logo painted in the middle of the field before landing. Confetti rains from invisible cannons, imaginary marching bands play, and a few birds fly overhead, looking very confused. Hits cause Mr. Repole to somersault, breakdance, or even attempt a celebratory moonwalk. Misses result in dramatic sulks, exaggerated sighs, and mock negotiations with the math gods: “Come on, I just need one more π bomb!”</p>
-
 <p>The students cheer, gasp, and occasionally fall out of their chairs laughing. “Wait—he just did a 360 spin AND hit a π line!” one whispers. Mr. Repole narrates each throw with witty commentary: “That one’s going straight to π heaven!” “Touchdown… for π!” “Even Eli would approve this throw!”</p>
-
 <p>By the end of the day, everyone has learned π, had an abdominal workout from laughing, and witnessed history: a quarterback who combined physics, math, and comedy in a single throw. Mr. Repole dreams of a world where laughter is mandatory, π is approximated with flying footballs, and students are awarded imaginary trophies shaped like the Greek letter itself. He stands proudly, wiping confetti off his helmet, and declares: “It’s easy! But also… ridiculously fun!”</p>
 </div>
 
@@ -59,6 +55,13 @@ h1 { margin:10px 0; font-size:28px; color:darkblue;}
 </div>
 
 <script>
+// Story toggle
+function toggleStory(){
+  const story = document.getElementById('story');
+  story.style.display = (story.style.display==='none')?'block':'none';
+}
+
+// Canvas setup and game logic (same as before, except calculation)
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 
@@ -179,10 +182,10 @@ function fastMode(){
 function updateStats(){
   document.getElementById('total').textContent = totalThrows;
   document.getElementById('hits').textContent = hits;
-  let piApprox = hits>0 ? (2*mathFootballLength*totalThrows)/(lineSpacing*hits) - 0.22 : 0;
+  let piApprox = hits>0 ? (2*mathFootballLength*totalThrows)/(lineSpacing*hits) : 0;
   document.getElementById('piApprox').textContent = piApprox.toFixed(6);
   document.getElementById('piDiff').textContent = Math.abs(Math.PI-piApprox).toFixed(6);
-  document.getElementById('calcSetup').textContent=`2*${totalThrows}*${mathFootballLength} / (${lineSpacing}*${hits}) - 0.22`;
+  document.getElementById('calcSetup').textContent=`2*${totalThrows}*${mathFootballLength} / (${lineSpacing}*${hits})`;
   document.getElementById('calcResult').textContent=piApprox.toFixed(6);
 }
 
